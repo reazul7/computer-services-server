@@ -60,6 +60,7 @@ client.connect((err) => {
   app.post("/placeService", (req, res) => {
     const status = req.body.status;
     const name = req.body.name;
+    const image = req.body.image;
     const email = req.body.email;
     const price = req.body.price;
     const service = req.body.service;
@@ -69,6 +70,7 @@ client.connect((err) => {
       .insertOne({
         name,
         email,
+        image,
         price,
         service,
         description,
