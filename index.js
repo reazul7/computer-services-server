@@ -76,7 +76,10 @@ client.connect((err) => {
       })
       .then((result) => {
         res.send(result.insertedCount > 0);
-      });
+      })
+      .catch(err => {
+        console.log(err);
+      })
   });
 
   //post method for review;
@@ -85,13 +88,13 @@ client.connect((err) => {
     const newFile = req.body.newFile;
     const description = req.body.description;
     const designation = req.body.designation;
-    const newImg = req.files.file.data;
-    const encImg = newImg.toString("base64");
-    var img = {
-      contentType: req.files.file.mimetype,
-      size: req.files.file.size,
-      img: Buffer.from(encImg, "base64"),
-    };
+    // const newImg = req.files.file.data;
+    // const encImg = newImg.toString("base64");
+    // var img = {
+    //   contentType: req.files.file.mimetype,
+    //   size: req.files.file.size,
+    //   img: Buffer.from(encImg, "base64"),
+    // };
     reviewCollection
       .insertOne({ name, description, designation, img, newFile })
       .then((result) => {
@@ -100,6 +103,7 @@ client.connect((err) => {
       });
   });
 
+
   //post method for set admin;
   app.post("/setAdmin", (req, res) => {
     const email = req.body.email;
@@ -107,7 +111,9 @@ client.connect((err) => {
     adminCollection.insertOne({ email, pass }).then((result) => {
       console.log(result);
       res.send(result);
-    });
+    }).then(err => {
+      console.log(err);
+    })
   });
 
   //get method for review
@@ -138,11 +144,23 @@ client.connect((err) => {
 
   app.get("/admin", (req, res) => {
     const email = req.query.email;
-
     adminCollection.find({ email }).toArray((err, collection) => {
       res.send(collection.length > 0);
     });
   });
+
+
+  // delete service
+  app.delete("/deleteService/:id", (req, res) => {
+    serviceCollection.deleteOne({_id: ObjectID(req.params.id)})
+    .then((result) =>{
+      res.send(result.deletedCount > 0);
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+  })
+
 
   //patch method;
   app.patch("/updateSurviceById/:id", (req, res) => {
@@ -155,7 +173,10 @@ client.connect((err) => {
       )
       .then((result) => {
         res.send(result.modifiedCount > 0);
-      });
+      })
+      .catch((err) => {
+        console.log(err);
+      })
   });
 
   const calculateOrderAmount = (items) => {
@@ -184,5 +205,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(process.env.PORT || port, () => {
-  console.log("Listening port 5000");
+  // console.log("Listening port 5000");
 });
