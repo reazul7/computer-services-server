@@ -5,13 +5,12 @@ const fileUpload = require("express-fileupload");
 const fs = require("fs-extra");
 const MongoClient = require("mongodb").MongoClient;
 const ObjectID = require("mongodb").ObjectID;
-// const stripe = require("stripe")("pk_test_51IhsRTDIrlQ0GMJ6Blyc2Y5WNa1tGNERjnT5IoPpXd9NagrXrnh9WSBABWYUE5NLWHCszPtL5O2nPYUfNj3tK9oK00vJItvxfW");
-const stripe = require("stripe")("sk_test_51IhsRTDIrlQ0GMJ6jlrqHDjK658wUvv2mEUdGXStxqGHkb5DyCvoigAg32OXc2uqn3FqouZndAR9ZtKoBC6JoLZ600Kr2prEkz");
+
+const stripe = require("stripe")(
+  "sk_test_51IhsRTDIrlQ0GMJ6jlrqHDjK658wUvv2mEUdGXStxqGHkb5DyCvoigAg32OXc2uqn3FqouZndAR9ZtKoBC6JoLZ600Kr2prEkz"
+);
 
 require("dotenv").config();
-
-// "https://warm-springs-45915.herokuapp.com/"
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5ae7d.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 
 const app = express();
@@ -34,8 +33,7 @@ client.connect((err) => {
   console.log("db connection success");
 
   //post method for admin data;
-
-  app.post("/addAdmin", (req, res) => {
+  app.post("/addService", (req, res) => {
     // const file = req.files.file;
     const title = req.body.title;
     const description = req.body.description;
@@ -56,7 +54,6 @@ client.connect((err) => {
   });
 
   //post method for user data;
-
   app.post("/placeService", (req, res) => {
     const status = req.body.status;
     const name = req.body.name;
@@ -79,9 +76,9 @@ client.connect((err) => {
       .then((result) => {
         res.send(result.insertedCount > 0);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
-      })
+      });
   });
 
   //post method for review;
@@ -90,13 +87,7 @@ client.connect((err) => {
     const newFile = req.body.newFile;
     const description = req.body.description;
     const designation = req.body.designation;
-    // const newImg = req.files.file.data;
-    // const encImg = newImg.toString("base64");
-    // var img = {
-    //   contentType: req.files.file.mimetype,
-    //   size: req.files.file.size,
-    //   img: Buffer.from(encImg, "base64"),
-    // };
+    const img = req.body.photo;
     reviewCollection
       .insertOne({ name, description, designation, img, newFile })
       .then((result) => {
@@ -105,19 +96,22 @@ client.connect((err) => {
       });
   });
 
-
   //post method for set admin;
   app.post("/setAdmin", (req, res) => {
     const email = req.body.email;
     const pass = req.body.password;
-    adminCollection.insertOne({ email, pass }).then((result) => {
-      console.log(result);
-      res.send(result);
-    }).then(err => {
-      console.log(err);
-    })
+    adminCollection
+      .insertOne({ email, pass })
+      .then((result) => {
+        console.log(result);
+        res.send(result);
+      })
+      .then((err) => {
+        console.log(err);
+      });
   });
 
+  // get methods
   //get method for review
   app.get("/seeReview", (req, res) => {
     reviewCollection.find({}).toArray((err, documents) => {
@@ -151,18 +145,17 @@ client.connect((err) => {
     });
   });
 
-
   // delete service
   app.delete("/deleteService/:id", (req, res) => {
-    serviceCollection.deleteOne({_id: ObjectID(req.params.id)})
-    .then((result) =>{
-      res.send(result.deletedCount > 0);
-    })
-    .catch((err) => {
-      console.log(err);
-    })
-  })
-
+    serviceCollection
+      .deleteOne({ _id: ObjectID(req.params.id) })
+      .then((result) => {
+        res.send(result.deletedCount > 0);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
 
   //patch method;
   app.patch("/updateSurviceById/:id", (req, res) => {
@@ -178,7 +171,7 @@ client.connect((err) => {
       })
       .catch((err) => {
         console.log(err);
-      })
+      });
   });
 
   const calculateOrderAmount = (items) => {
